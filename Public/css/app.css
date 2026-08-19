@@ -1,12 +1,17 @@
 /* Loom layout and components.
-   No transitions, no keyframes, no motion of any kind — animation is owner-led.
-   State is expressed through data attributes and aria state so motion can be
-   attached later without touching markup. */
+
+   Zero motion by contract: no transitions, no keyframes, no easing, and no
+   hover highlights anywhere. Every visual change is an instant swap driven by
+   a data attribute or aria state, never by pointer position. Animation is
+   owner-led and lands in a later pass. */
 
 *,
 *::before,
 *::after {
 	box-sizing: border-box;
+	/* Hard stop on motion, including anything Monaco injects at runtime. */
+	transition: none !important;
+	animation: none !important;
 }
 
 [hidden] {
@@ -17,6 +22,7 @@ html,
 body {
 	margin: 0;
 	height: 100%;
+	scroll-behavior: auto;
 }
 
 body {
@@ -34,6 +40,13 @@ body {
 	display: block;
 }
 
+/* Keyboard focus is a static outline, not a highlight effect. Pointer users
+   never see it, so the no-hover rule holds. */
+:focus-visible {
+	outline: 1px solid var(--text-muted);
+	outline-offset: 2px;
+}
+
 ::-webkit-scrollbar {
 	width: 10px;
 	height: 10px;
@@ -42,10 +55,6 @@ body {
 ::-webkit-scrollbar-thumb {
 	background: var(--border-default);
 	border-radius: 5px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-	background: var(--border-strong);
 }
 
 ::-webkit-scrollbar-track {
@@ -57,12 +66,25 @@ body {
 .app-header {
 	display: flex;
 	align-items: center;
-	gap: var(--space-3);
 	flex: none;
 	height: var(--header-height);
 	padding: 0 var(--space-6);
 	background: var(--surface-header);
 	border-bottom: 1px solid var(--border-subtle);
+}
+
+/* The mark is the reset control. Reads as the wordmark, behaves as a button. */
+.app-brand {
+	display: flex;
+	align-items: center;
+	gap: var(--space-3);
+	padding: 0;
+	background: none;
+	border: none;
+	border-radius: var(--radius-sm);
+	color: inherit;
+	font: inherit;
+	cursor: pointer;
 }
 
 .app-logo {
@@ -77,13 +99,13 @@ body {
 	letter-spacing: -0.01em;
 }
 
-/* The wordmark stands in for the product on the empty state, then steps aside
-   once a workspace is loaded — matches the two design states. */
+/* The wordmark carries the home screen, then steps aside once a workspace is
+   loaded. The mark stays clickable in both states. */
 .app-header[data-workspace="true"] .app-wordmark {
 	display: none;
 }
 
-/* ---------- Empty state ---------- */
+/* ---------- Home screen ---------- */
 
 .empty-state {
 	flex: 1;
@@ -109,16 +131,8 @@ body {
 	cursor: pointer;
 }
 
-.empty-card:hover {
-	border-color: var(--border-strong);
-}
-
 .empty-card:disabled {
 	cursor: default;
-}
-
-.empty-card:disabled:hover {
-	border-color: var(--border-default);
 }
 
 .empty-icon {
@@ -229,6 +243,7 @@ body {
 	flex: none;
 }
 
+/* No hover state, so the resting color carries the affordance. */
 .icon-btn {
 	display: grid;
 	place-items: center;
@@ -238,13 +253,8 @@ body {
 	background: none;
 	border: none;
 	border-radius: var(--radius-sm);
-	color: var(--text-muted);
+	color: var(--text-secondary);
 	cursor: pointer;
-}
-
-.icon-btn:hover {
-	background: var(--surface-row);
-	color: var(--text-primary);
 }
 
 /* ---------- File tree ---------- */
@@ -268,10 +278,7 @@ body {
 	user-select: none;
 }
 
-.tree-row:hover {
-	background: var(--surface-row);
-}
-
+/* Selection is the only row state, and it lands instantly. */
 .tree-row[aria-selected="true"] {
 	background: var(--surface-row-active);
 	color: var(--text-primary);
@@ -342,14 +349,10 @@ body {
 	flex: none;
 	padding: 0 var(--space-3);
 	border-right: 1px solid var(--border-subtle);
-	color: var(--text-muted);
+	color: var(--text-secondary);
 	cursor: pointer;
 	user-select: none;
 	white-space: nowrap;
-}
-
-.tab:hover {
-	color: var(--text-secondary);
 }
 
 .tab[aria-selected="true"] {
@@ -374,6 +377,8 @@ body {
 	font-size: var(--text-base);
 }
 
+/* Always visible. A close button that only appears on hover is a hover
+   effect, so every tab shows its own at rest. */
 .tab-close {
 	display: grid;
 	place-items: center;
@@ -385,17 +390,6 @@ body {
 	border-radius: var(--radius-sm);
 	color: var(--text-muted);
 	cursor: pointer;
-	visibility: hidden;
-}
-
-.tab[aria-selected="true"] .tab-close,
-.tab:hover .tab-close {
-	visibility: visible;
-}
-
-.tab-close:hover {
-	background: var(--surface-row-active);
-	color: var(--text-primary);
 }
 
 .tab-add {
@@ -406,13 +400,8 @@ body {
 	padding: 0;
 	background: none;
 	border: none;
-	color: var(--text-muted);
+	color: var(--text-secondary);
 	cursor: pointer;
-}
-
-.tab-add:hover {
-	background: var(--surface-row);
-	color: var(--text-primary);
 }
 
 /* ---------- Breadcrumb + save status ---------- */
@@ -495,18 +484,14 @@ body {
 	background: none;
 	border: none;
 	border-radius: var(--radius-sm);
-	color: var(--text-secondary);
+	color: var(--text-primary);
 	font: inherit;
 	font-size: var(--text-base);
 	text-align: left;
 	cursor: pointer;
 }
 
-.context-item:hover {
-	background: var(--surface-row);
-	color: var(--text-primary);
-}
-
-.context-item[data-danger="true"]:hover {
+/* Destructive intent is carried by resting color, not by a hover reveal. */
+.context-item[data-danger="true"] {
 	color: var(--accent-danger);
 }

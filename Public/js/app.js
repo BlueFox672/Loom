@@ -10,6 +10,7 @@ const byId = (id) => document.getElementById(id)
 
 const els = {
 	header: byId("app-header"),
+	brand: byId("app-brand"),
 	emptyState: byId("empty-state"),
 	openFolder: byId("open-folder"),
 	emptyEyebrow: byId("empty-eyebrow"),
@@ -333,6 +334,42 @@ async function deleteNode(node) {
 	await refreshTree()
 }
 
+/* ---------- content reset ---------- */
+
+// Clicking the Loom mark clears the workspace back to the home screen.
+// Content only: the page is never reloaded, so there is no network round trip
+// and no flash of a blank document.
+function resetContent() {
+	const unsaved = state.tabs.filter((tab) => tab.dirty).length
+	if (
+		unsaved &&
+		!window.confirm(
+			`${unsaved} file${unsaved === 1 ? " has" : "s have"} unsaved changes. Reset anyway?`,
+		)
+	) {
+		return
+	}
+
+	for (const tab of [...state.tabs]) dropTab(tab.path)
+
+	state.root = null
+	state.rootName = ""
+	state.nodes = []
+	state.expanded = new Set()
+	state.tabs = []
+	state.activePath = null
+
+	els.rootName.textContent = ""
+	els.rootName.removeAttribute("title")
+	hideContextMenu()
+	syncEditorModel()
+	render()
+
+	els.workspace.hidden = true
+	els.emptyState.hidden = false
+	els.header.dataset.workspace = "false"
+}
+
 /* ---------- context menu ---------- */
 
 function showContextMenu(node, x, y) {
@@ -375,6 +412,9 @@ function hideContextMenu() {
 /* ---------- boot ---------- */
 
 function init() {
+	// The mark resets content in every state, supported browser or not.
+	els.brand.addEventListener("click", resetContent)
+
 	if (!disk.isSupported()) {
 		els.emptyEyebrow.textContent = "Browser not supported"
 		els.emptyTitle.textContent = "Open Loom in Chrome or Edge"
