@@ -5,6 +5,10 @@ import { ICONS, fileIcon } from "./icons.js"
 const INDENT_BASE = 8
 const INDENT_STEP = 14
 
+// Chevron column + gap + icon column + gap. Keeps "No files yet" aligned with
+// the labels of the rows it sits among instead of hanging under their icons.
+const LABEL_OFFSET = 44
+
 const indent = (depth) => INDENT_BASE + depth * INDENT_STEP
 
 export function renderTree(container, nodes, ctx) {
@@ -29,7 +33,7 @@ function buildLevel(nodes, ctx, depth) {
 function buildEmpty(depth) {
 	const row = document.createElement("div")
 	row.className = "tree-empty"
-	row.style.paddingLeft = `${indent(depth) + 22}px`
+	row.style.paddingLeft = `${indent(depth) + LABEL_OFFSET}px`
 	row.textContent = "No files yet"
 	return row
 }

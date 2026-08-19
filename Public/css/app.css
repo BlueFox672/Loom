@@ -189,6 +189,8 @@ body {
 	min-height: 0;
 }
 
+/* ---------- Explorer ---------- */
+
 .sidebar {
 	flex: none;
 	width: var(--sidebar-width);
@@ -204,7 +206,7 @@ body {
 	align-items: center;
 	gap: var(--space-2);
 	flex: none;
-	padding: var(--space-3);
+	padding: var(--space-4) var(--space-3);
 	border-bottom: 1px solid var(--border-subtle);
 }
 
@@ -229,6 +231,7 @@ body {
 
 .sidebar-name {
 	display: block;
+	margin-top: 2px;
 	font-size: var(--text-base);
 	font-weight: 700;
 	white-space: nowrap;
@@ -239,7 +242,7 @@ body {
 .sidebar-actions {
 	display: flex;
 	align-items: center;
-	gap: 2px;
+	gap: var(--space-1);
 	flex: none;
 }
 
@@ -263,14 +266,14 @@ body {
 	flex: 1;
 	min-height: 0;
 	overflow: auto;
-	padding: var(--space-2) var(--space-1);
+	padding: var(--space-3) var(--space-2);
 }
 
 .tree-row {
 	display: flex;
 	align-items: center;
 	gap: var(--space-2);
-	height: 28px;
+	height: var(--row-height);
 	padding-right: var(--space-2);
 	border-radius: var(--radius-md);
 	color: var(--text-secondary);
@@ -316,7 +319,7 @@ body {
 .tree-empty {
 	display: flex;
 	align-items: center;
-	height: 26px;
+	height: var(--row-height);
 	font-size: var(--text-sm);
 	color: var(--text-muted);
 }
@@ -347,7 +350,7 @@ body {
 	align-items: center;
 	gap: var(--space-2);
 	flex: none;
-	padding: 0 var(--space-3);
+	padding: 0 var(--space-4);
 	border-right: 1px solid var(--border-subtle);
 	color: var(--text-secondary);
 	cursor: pointer;
@@ -356,7 +359,7 @@ body {
 }
 
 .tab[aria-selected="true"] {
-	background: var(--surface-header);
+	background: var(--surface-sidebar);
 	color: var(--text-primary);
 }
 
@@ -377,13 +380,15 @@ body {
 	font-size: var(--text-base);
 }
 
-/* Always visible. A close button that only appears on hover is a hover
-   effect, so every tab shows its own at rest. */
+/* Rendered only for the active tab, so the strip stays uncluttered without
+   relying on a hover reveal. */
 .tab-close {
 	display: grid;
 	place-items: center;
+	flex: none;
 	width: 18px;
 	height: 18px;
+	margin-left: var(--space-1);
 	padding: 0;
 	background: none;
 	border: none;
@@ -396,10 +401,11 @@ body {
 	display: grid;
 	place-items: center;
 	flex: none;
-	width: 34px;
+	width: 38px;
 	padding: 0;
 	background: none;
 	border: none;
+	border-right: 1px solid var(--border-subtle);
 	color: var(--text-secondary);
 	cursor: pointer;
 }
@@ -453,6 +459,27 @@ body {
 
 .editor-mount {
 	height: 100%;
+}
+
+/* Separates the line-number gutter from the code column, echoing the border
+   between the explorer and the editor. Inset so Monaco's own layout math is
+   left untouched. */
+.monaco-editor .margin {
+	box-shadow: inset -1px 0 0 var(--border-subtle);
+}
+
+/* The explorer says "No files yet"; the editor says this. Sits on line 1 and
+   never intercepts clicks, so the file stays immediately typeable. `left` is
+   set from Monaco's measured content offset at runtime. */
+.editor-empty {
+	position: absolute;
+	top: var(--code-padding-top);
+	left: 60px;
+	font-family: var(--font-mono);
+	font-size: var(--text-base);
+	line-height: var(--code-line-height);
+	color: var(--text-muted);
+	pointer-events: none;
 }
 
 .editor-placeholder {

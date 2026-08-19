@@ -23,16 +23,21 @@ export function renderTabs(container, tabs, ctx) {
 		label.textContent = tab.name
 		element.appendChild(label)
 
-		const close = document.createElement("button")
-		close.type = "button"
-		close.className = "tab-close"
-		close.title = `Close ${tab.name}`
-		close.innerHTML = ICONS.close
-		close.addEventListener("click", (event) => {
-			event.stopPropagation()
-			ctx.onClose(tab.path)
-		})
-		element.appendChild(close)
+		// Only the active tab carries a close button. Revealing it on pointer
+		// entry would be a hover effect, and showing one on every tab crowds the
+		// strip, so it follows selection instead.
+		if (tab.path === ctx.activePath) {
+			const close = document.createElement("button")
+			close.type = "button"
+			close.className = "tab-close"
+			close.title = `Close ${tab.name}`
+			close.innerHTML = ICONS.close
+			close.addEventListener("click", (event) => {
+				event.stopPropagation()
+				ctx.onClose(tab.path)
+			})
+			element.appendChild(close)
+		}
 
 		element.addEventListener("click", () => ctx.onSelect(tab.path))
 		container.appendChild(element)
